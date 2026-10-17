@@ -1,0 +1,1191 @@
+<main class="pagina-inicial">
+
+  <header class="cabecalho">
+    <div class="marca">
+      <span class="simbolo">M</span>
+      <span>Monitoria Acadêmica</span>
+    </div>
+
+    <span class="identificacao">
+      Sistema de Controle de Monitoria
+    </span>
+  </header>
+
+  <!-- Página inicial -->
+  <section class="conteudo-principal" *ngIf="!mostrarLogin && !usuarioLogado">
+    <div class="texto-apresentacao">
+      <p class="etiqueta">ORGANIZAÇÃO • ACOMPANHAMENTO • APRENDIZADO</p>
+
+      <h1>Bem-vindo ao Sistema de Controle de Monitoria de Alunos</h1>
+
+      <p class="descricao">
+        Organize as atividades de monitoria, acompanhe os atendimentos
+        e registre as informações acadêmicas em um só lugar.
+      </p>
+
+      <button class="botao-principal" type="button" (click)="entrar()">
+        Acessar o sistema →
+      </button>
+    </div>
+
+    <div class="cartao-ilustrativo">
+      <div class="icone-grande">✓</div>
+      <h2>Monitoria organizada</h2>
+      <p>Mais organização para as atividades acadêmicas.</p>
+      <p>✓ Cadastro de informações</p>
+      <p>✓ Acompanhamento de monitorias</p>
+      <p>✓ Relatórios acadêmicos</p>
+    </div>
+  </section>
+
+  <!-- Tela de login -->
+  <section class="area-login" *ngIf="mostrarLogin && !usuarioLogado">
+    <div class="cartao-login">
+      <button class="botao-voltar" type="button" (click)="voltarInicio()">
+        ← Voltar ao início
+      </button>
+
+      <h1>Entrar no sistema</h1>
+
+      <p class="descricao">
+        Informe qualquer login e senha para acessar o painel de testes.
+      </p>
+
+      <form (ngSubmit)="fazerLogin()">
+        <label for="login">Login</label>
+        <input
+          id="login"
+          type="text"
+          name="login"
+          [(ngModel)]="login"
+          required
+          placeholder="Digite seu usuário">
+
+        <label for="senha">Senha</label>
+        <input
+          id="senha"
+          type="password"
+          name="senha"
+          [(ngModel)]="senha"
+          required
+          placeholder="Digite sua senha">
+
+        <button
+          class="botao-principal botao-login"
+          type="submit"
+          [disabled]="carregando">
+          {{ carregando ? 'Entrando...' : 'Entrar' }}
+        </button>
+
+        <p class="mensagem" *ngIf="mensagemLogin" role="status">
+          {{ mensagemLogin }}
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <!-- Painel do usuário logado -->
+  <section
+    class="conteudo-principal painel-monitoria"
+    *ngIf="usuarioLogado">
+
+    <div class="texto-apresentacao">
+      <p class="etiqueta">PAINEL DO SISTEMA</p>
+
+      <h1>Olá, {{ usuarioLogado.nome }}!</h1>
+
+      <p class="descricao">Módulo de Administração do Sistema.</p>
+
+      <p><strong>Usuário:</strong> {{ usuarioLogado.login }}</p>
+
+      <p *ngIf="usuarioLogado.perfis.length">
+        <strong>Perfil:</strong> {{ usuarioLogado.perfis.join(', ') }}
+      </p>
+
+      <button
+        class="botao-principal botao-secundario"
+        type="button"
+        (click)="sair()">
+        Sair do sistema
+      </button>
+    </div>
+
+    <!-- Módulo do administrador -->
+    <div
+      class="area-admin"
+      *ngIf="temPerfil('ADMINISTRADOR') || temPerfil('ADMIN')"
+      style="width: 100%; margin-top: 20px;">
+
+      <!-- Navegação por abas -->
+      <nav
+        class="menu-abas-admin"
+        style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
+
+        <button
+          type="button"
+          [class.ativo]="abaAdmin === 'ies'"
+          (click)="abaAdmin = 'ies'">
+          🏛️ IES
+        </button>
+
+        <button
+          type="button"
+          [class.ativo]="abaAdmin === 'ca'"
+          (click)="abaAdmin = 'ca'; carregarCA()">
+          🏫 Centros Acadêmicos
+        </button>
+
+        <button
+          type="button"
+          [class.ativo]="abaAdmin === 'cursos'"
+          (click)="abaAdmin = 'cursos'; carregarCursosAdmin(); carregarCentrosAcademicosCurso()">
+          🎓 Cursos
+        </button>
+
+        <button
+          type="button"
+          [class.ativo]="abaAdmin === 'docentes'"
+          (click)="abaAdmin = 'docentes'; carregarDocentes(); carregarCentrosAcademicosDocente()">
+          👨‍🏫 Docentes
+        </button>
+
+        <button
+          type="button"
+          [class.ativo]="abaAdmin === 'logs'"
+          (click)="abaAdmin = 'logs'; paginaLogs = 0; carregarLogs()">
+          📋 Logs
+        </button>
+
+        <button
+          type="button"
+          [class.ativo]="abaAdmin === 'relatorios'"
+          (click)="abaAdmin = 'relatorios'">
+          📊 Relatórios
+        </button>
+      </nav>
+
+      <!-- ABA 1: IES -->
+      <section class="conteudo-aba" *ngIf="abaAdmin === 'ies'">
+        <div class="titulo-secao">
+          <p class="etiqueta">ESTRUTURA ACADÊMICA</p>
+          <h2>Cadastrar Instituição de Ensino Superior (IES)</h2>
+        </div>
+
+        <form
+          class="formulario-admin"
+          (ngSubmit)="cadastrarIes()"
+          style="margin-bottom: 24px;">
+
+          <div style="display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap;">
+            <div style="flex: 1;">
+              <label for="siglaIes">Sigla *</label>
+              <input
+                id="siglaIes"
+                type="text"
+                name="siglaIes"
+                [(ngModel)]="novaIes.sigla"
+                placeholder="Ex.: UCSAL"
+                required>
+            </div>
+
+            <div style="flex: 2;">
+              <label for="nomeIes">Nome da IES *</label>
+              <input
+                id="nomeIes"
+                type="text"
+                name="nomeIes"
+                [(ngModel)]="novaIes.nome"
+                placeholder="Ex.: Universidade Católica do Salvador"
+                required>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap;">
+            <div style="flex: 1;">
+              <label for="emailIes">E-mail Central *</label>
+              <input
+                id="emailIes"
+                type="email"
+                name="emailIes"
+                [(ngModel)]="novaIes.emailCentral"
+                placeholder="central@ucsal.br"
+                required>
+            </div>
+
+            <div style="flex: 1;">
+              <label for="telefoneIes">Telefone Central *</label>
+              <input
+                id="telefoneIes"
+                type="text"
+                name="telefoneIes"
+                [(ngModel)]="novaIes.telefoneCentral"
+                placeholder="(71) 3203-2500"
+                required>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap;">
+            <div style="flex: 1;">
+              <label for="reitorIes">Nome do Reitor (1 por IES) *</label>
+              <input
+                id="reitorIes"
+                type="text"
+                name="reitorIes"
+                [(ngModel)]="novaIes.reitor"
+                placeholder="Nome do Reitor"
+                required>
+            </div>
+
+            <div style="flex: 1;">
+              <label for="proReitorias">Pró-Reitorias</label>
+              <input
+                id="proReitorias"
+                type="text"
+                name="proReitorias"
+                [(ngModel)]="novaIes.proReitorias"
+                placeholder="Ex.: PROGRAD, PROPESP">
+            </div>
+          </div>
+
+          <button class="botao-principal" type="submit">
+            Cadastrar IES
+          </button>
+
+          <p class="mensagem" *ngIf="mensagemIes" style="margin-top: 10px;">
+            {{ mensagemIes }}
+          </p>
+        </form>
+
+        <div>
+          <h3>IES Cadastradas</h3>
+
+          <table style="width: 100%; border-collapse: collapse; margin-top: 10px; border: 1px solid #ccc;">
+            <thead>
+              <tr style="background: #f2f2f2; text-align: left;">
+                <th style="padding: 8px; border: 1px solid #ccc;">Sigla</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">Nome</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">E-mail</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">Reitor</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">Status</th>
+                <th style="padding: 8px; border: 1px solid #ccc;">Ação</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let ies of listaIes">
+                <td style="padding: 8px; border: 1px solid #ccc;">
+                  <strong>{{ ies.sigla }}</strong>
+                </td>
+                <td style="padding: 8px; border: 1px solid #ccc;">
+                  {{ ies.nome }}
+                </td>
+                <td style="padding: 8px; border: 1px solid #ccc;">
+                  {{ ies.emailCentral }}
+                </td>
+                <td style="padding: 8px; border: 1px solid #ccc;">
+                  {{ ies.reitor }}
+                </td>
+                <td style="padding: 8px; border: 1px solid #ccc;">
+                  {{ ies.status || 'ATIVO' }}
+                </td>
+                <td style="padding: 8px; border: 1px solid #ccc;">
+                  <button
+                    type="button"
+                    (click)="alternarStatusIes(ies)">
+                    {{ ies.status === 'INATIVO' ? 'Ativar' : 'Inativar' }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ABA 2: DOCENTES -->
+      <section class="conteudo-aba" *ngIf="abaAdmin === 'docentes'">
+        <div class="titulo-secao">
+          <p class="etiqueta">GERENCIAMENTO DE USUÁRIOS</p>
+          <h2>Gerenciar Docentes</h2>
+          <p>
+            Cadastre docentes, vincule cada um a um único Centro Acadêmico
+            e gerencie seu status de acesso.
+          </p>
+        </div>
+
+        <p *ngIf="mensagemDocente" [class]="tipoMensagemDocente" role="status">
+          {{ mensagemDocente }}
+        </p>
+
+        <form class="formulario-admin" (ngSubmit)="salvarDocenteAdmin()">
+          <h3>
+            {{ editandoDocenteId !== null ? 'Editar docente' : 'Cadastrar docente' }}
+          </h3>
+
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;">
+            <div style="flex: 1; min-width: 220px;">
+              <label for="matriculaDocente">Matrícula *</label>
+              <input
+                id="matriculaDocente"
+                name="matriculaDocente"
+                type="text"
+                [(ngModel)]="novoDocente.matricula"
+                maxlength="30"
+                [disabled]="editandoDocenteId !== null"
+                placeholder="Número de matrícula"
+                required>
+            </div>
+
+            <div style="flex: 2; min-width: 220px;">
+              <label for="nomeDocente">Nome completo *</label>
+              <input
+                id="nomeDocente"
+                name="nomeDocente"
+                type="text"
+                [(ngModel)]="novoDocente.nome"
+                maxlength="150"
+                placeholder="Nome completo do docente"
+                required>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;">
+            <div style="flex: 1; min-width: 220px;">
+              <label for="emailDocente">E-mail de contato *</label>
+              <input
+                id="emailDocente"
+                name="emailDocente"
+                type="email"
+                [(ngModel)]="novoDocente.email"
+                placeholder="docente@instituicao.edu.br"
+                required>
+            </div>
+
+            <div style="flex: 1; min-width: 220px;">
+              <label for="telefoneDocente">Telefone de contato *</label>
+              <input
+                id="telefoneDocente"
+                name="telefoneDocente"
+                type="tel"
+                [(ngModel)]="novoDocente.telefone"
+                maxlength="30"
+                placeholder="(71) 99999-9999"
+                required>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label for="caDocente">Centro Acadêmico vinculado *</label>
+            <select
+              id="caDocente"
+              name="caDocente"
+              [(ngModel)]="novoDocente.centroAcademicoId"
+              required>
+              <option [ngValue]="0">Selecione um Centro Acadêmico</option>
+              <option *ngFor="let ca of centrosAcademicosDocente" [ngValue]="ca.id">
+                {{ ca.sigla }} — {{ ca.descricao }}
+              </option>
+            </select>
+          </div>
+
+          <div *ngIf="editandoDocenteId === null" style="margin-bottom: 12px;">
+            <label for="senhaInicialDocente">Senha inicial (opcional)</label>
+            <input
+              id="senhaInicialDocente"
+              name="senhaInicialDocente"
+              type="password"
+              [(ngModel)]="novoDocente.senhaInicial"
+              minlength="6"
+              placeholder="Mínimo de 6 caracteres">
+            <p>
+              Se não informar uma senha, será utilizada a matrícula,
+              conforme a regra do Back-End.
+            </p>
+          </div>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button
+              class="botao-principal"
+              type="submit"
+              [disabled]="salvandoDocente">
+              {{
+                salvandoDocente
+                  ? 'Salvando...'
+                  : editandoDocenteId !== null
+                    ? 'Salvar alterações'
+                    : 'Cadastrar docente'
+              }}
+            </button>
+
+            <button type="button" (click)="limparFormularioDocenteAdmin()">
+              Cancelar / Limpar
+            </button>
+          </div>
+        </form>
+
+        <hr>
+
+        <div>
+          <h3>Docentes cadastrados</h3>
+
+          <button
+            type="button"
+            (click)="carregarDocentes()"
+            [disabled]="carregandoDocentes">
+            {{ carregandoDocentes ? 'Carregando...' : 'Atualizar lista' }}
+          </button>
+
+          <p *ngIf="carregandoDocentes">Carregando docentes...</p>
+
+          <p *ngIf="!carregandoDocentes && docentesAdmin.length === 0">
+            Nenhum docente encontrado ou a lista ainda não foi carregada.
+          </p>
+
+          <div
+            *ngFor="let docente of docentesAdmin"
+            style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-top: 12px;">
+
+            <h4>{{ docente.nome }}</h4>
+            <p><strong>Matrícula:</strong> {{ docente.matricula }}</p>
+            <p><strong>E-mail:</strong> {{ docente.email }}</p>
+            <p><strong>Telefone:</strong> {{ docente.telefone }}</p>
+            <p><strong>Centro Acadêmico:</strong> {{ docente.centroAcademicoSigla }}</p>
+            <p><strong>Data de cadastro:</strong> {{ docente.dataCadastro | date:'dd/MM/yyyy HH:mm' }}</p>
+            <p><strong>Login:</strong> {{ docente.login }}</p>
+            <p><strong>Perfil de acesso:</strong> COLABORADOR</p>
+            <p><strong>Status:</strong> {{ docente.status }}</p>
+
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" (click)="editarDocenteAdmin(docente)">
+                Editar
+              </button>
+
+              <button type="button" (click)="abrirStatusDocente(docente)">
+                {{ docente.status === 'ATIVO' ? 'Inativar' : 'Reativar' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Confirmação de alteração de status -->
+        <div
+          *ngIf="docenteSelecionadoStatus"
+          class="formulario-admin"
+          style="margin-top: 24px;">
+
+          <h3>
+            {{
+              docenteSelecionadoStatus.status === 'ATIVO'
+                ? 'Inativar docente'
+                : 'Reativar docente'
+            }}
+          </h3>
+
+          <p><strong>Docente:</strong> {{ docenteSelecionadoStatus.nome }}</p>
+
+          <label for="motivoStatusDocente">Motivo da alteração *</label>
+          <textarea
+            id="motivoStatusDocente"
+            name="motivoStatusDocente"
+            [(ngModel)]="motivoStatusDocente"
+            rows="3"
+            placeholder="Informe o motivo da inativação ou reativação"
+            required>
+          </textarea>
+
+          <p *ngIf="mensagemStatusDocente" role="status">
+            {{ mensagemStatusDocente }}
+          </p>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button
+              class="botao-principal"
+              type="button"
+              (click)="confirmarStatusDocente()"
+              [disabled]="salvandoStatusDocente">
+              {{ salvandoStatusDocente ? 'Processando...' : 'Confirmar alteração' }}
+            </button>
+
+            <button type="button" (click)="cancelarAlteracaoStatusDocente()">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 3: CURSOS -->
+      <section class="conteudo-aba" *ngIf="abaAdmin === 'cursos'">
+        <div class="titulo-secao">
+          <p class="etiqueta">ESTRUTURA ACADÊMICA</p>
+          <h2>Gerenciamento de Cursos</h2>
+          <p>Cadastre e consulte os cursos vinculados aos Centros Acadêmicos.</p>
+        </div>
+
+        <p *ngIf="carregandoCursosAdmin">Carregando cursos...</p>
+
+        <p *ngIf="mensagemCursoAdmin" [class]="tipoMensagemCursoAdmin" role="status">
+          {{ mensagemCursoAdmin }}
+        </p>
+
+        <form
+          class="formulario-admin"
+          (ngSubmit)="salvarCursoAdmin()"
+          style="margin-bottom: 24px;">
+
+          <div style="margin-bottom: 12px;">
+            <label for="siglaCurso">Sigla *</label>
+            <input
+              id="siglaCurso"
+              name="siglaCurso"
+              type="text"
+              [(ngModel)]="novoCursoAdmin.sigla"
+              maxlength="20"
+              placeholder="Ex.: ADS"
+              required>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label for="descricaoCurso">Descrição *</label>
+            <input
+              id="descricaoCurso"
+              name="descricaoCurso"
+              type="text"
+              [(ngModel)]="novoCursoAdmin.descricao"
+              maxlength="200"
+              placeholder="Ex.: Análise e Desenvolvimento de Sistemas"
+              required>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label for="centroCurso">Centro Acadêmico *</label>
+            <select
+              id="centroCurso"
+              name="centroCurso"
+              [(ngModel)]="novoCursoAdmin.centroAcademicoId"
+              required>
+              <option [ngValue]="0" disabled>Selecione um Centro Acadêmico</option>
+              <option *ngFor="let centro of centrosAcademicosCurso" [ngValue]="centro.id">
+                {{ centro.sigla }} — {{ centro.descricao || centro.sigla }}
+              </option>
+            </select>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label>Turnos disponíveis *</label>
+            <div *ngFor="let turno of turnosDisponiveis">
+              <label>
+                <input
+                  type="checkbox"
+                  [checked]="novoCursoAdmin.turnos.includes(turno)"
+                  (change)="alternarTurnoCurso(turno, $any($event.target).checked)">
+                {{ turno }}
+              </label>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label for="coordenadorCurso">Coordenador *</label>
+            <input
+              id="coordenadorCurso"
+              name="coordenadorCurso"
+              type="text"
+              [(ngModel)]="novoCursoAdmin.coordenador"
+              placeholder="Nome do coordenador"
+              required>
+          </div>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button
+              class="botao-principal"
+              type="submit"
+              [disabled]="salvandoCursoAdmin">
+              {{
+                salvandoCursoAdmin
+                  ? 'Salvando...'
+                  : editandoCursoAdminId !== null
+                    ? 'Salvar alterações'
+                    : 'Cadastrar curso'
+              }}
+            </button>
+
+            <button type="button" (click)="limparFormularioCursoAdmin()">
+              Limpar formulário
+            </button>
+          </div>
+        </form>
+
+        <hr>
+
+        <div>
+          <h3>Cursos cadastrados</h3>
+
+          <button
+            type="button"
+            (click)="carregarCursosAdmin()"
+            [disabled]="carregandoCursosAdmin">
+            Atualizar lista
+          </button>
+
+          <p *ngIf="!carregandoCursosAdmin && cursosAdmin.length === 0">
+            Nenhum curso encontrado.
+          </p>
+
+          <div
+            *ngFor="let curso of cursosAdmin"
+            class="card-curso"
+            style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-top: 12px;">
+
+            <h4>{{ curso.sigla }} — {{ curso.descricao }}</h4>
+            <p><strong>Centro Acadêmico:</strong> {{ curso.centroAcademicoSigla }}</p>
+            <p><strong>IES:</strong> {{ curso.iesSigla }}</p>
+            <p><strong>Coordenador:</strong> {{ curso.coordenador }}</p>
+            <p><strong>Turnos:</strong> {{ curso.turnos?.join(', ') || 'Não informado' }}</p>
+            <p><strong>Status:</strong> {{ curso.status }}</p>
+
+            <button type="button" (click)="editarCursoAdmin(curso)">
+              Editar
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 4: CENTROS ACADÊMICOS -->
+      <section class="conteudo-aba" *ngIf="abaAdmin === 'ca'">
+        <div class="titulo-secao">
+          <p class="etiqueta">ESTRUTURA ACADÊMICA</p>
+          <h2>Centros Acadêmicos</h2>
+        </div>
+
+        <p *ngIf="mensagemCA" role="status">{{ mensagemCA }}</p>
+        <p *ngIf="carregandoCA">Carregando Centros Acadêmicos...</p>
+
+        <div *ngFor="let ca of listaCentrosAcademicos">
+          <h4>{{ ca.sigla }} — {{ ca.nome }}</h4>
+          <p><strong>IES:</strong> {{ ca.iesSigla }}</p>
+          <p><strong>Coordenador:</strong> {{ ca.coordenador }}</p>
+          <p><strong>Status:</strong> {{ ca.status }}</p>
+        </div>
+      </section>
+
+      <!-- ABA 5: LOGS DE AUDITORIA -->
+      <section class="conteudo-aba" *ngIf="abaAdmin === 'logs'">
+        <div class="titulo-secao">
+          <p class="etiqueta">MONITORAMENTO DO SISTEMA</p>
+          <h2>Monitorar logs de auditoria</h2>
+          <p>
+            Consulte o histórico de ações registradas no sistema,
+            incluindo usuário, operação, endereço acessado e data e hora.
+          </p>
+        </div>
+
+        <!-- Pesquisa e atualização -->
+        <form
+          class="formulario-admin"
+          (ngSubmit)="pesquisarLogs()"
+          style="margin-bottom: 20px;">
+
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: end;">
+            <div style="flex: 1; min-width: 220px;">
+              <label for="filtroUsuarioLogs">Filtrar por usuário</label>
+              <input
+                id="filtroUsuarioLogs"
+                name="filtroUsuarioLogs"
+                type="text"
+                [(ngModel)]="filtroUsuarioLogs"
+                placeholder="Digite o login do usuário">
+            </div>
+
+            <button
+              class="botao-principal"
+              type="submit"
+              [disabled]="carregandoLogs">
+              Pesquisar
+            </button>
+
+            <button
+              type="button"
+              (click)="filtroUsuarioLogs = ''; pesquisarLogs()"
+              [disabled]="carregandoLogs">
+              Limpar filtro
+            </button>
+
+            <button
+              type="button"
+              (click)="atualizarLogs()"
+              [disabled]="carregandoLogs">
+              {{ carregandoLogs ? 'Atualizando...' : 'Atualizar logs' }}
+            </button>
+          </div>
+        </form>
+
+        <!-- Resumo dos registros -->
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
+          <div style="flex: 1; min-width: 160px; padding: 16px; border: 1px solid #ddd; border-radius: 8px;">
+            <p>Registros encontrados</p>
+            <h3>{{ totalRegistrosLogs }}</h3>
+          </div>
+
+          <div style="flex: 1; min-width: 160px; padding: 16px; border: 1px solid #ddd; border-radius: 8px;">
+            <p>Página atual</p>
+            <h3>
+              {{ totalPaginasLogs > 0 ? paginaLogs + 1 : 0 }}
+              de {{ totalPaginasLogs }}
+            </h3>
+          </div>
+        </div>
+
+        <p *ngIf="carregandoLogs" role="status">
+          Carregando logs de auditoria...
+        </p>
+
+        <p *ngIf="mensagemLogs" role="status" style="margin: 12px 0;">
+          {{ mensagemLogs }}
+        </p>
+
+        <!-- Tabela de auditoria -->
+        <div style="width: 100%; overflow-x: auto;">
+          <table
+            *ngIf="logsAuditoria.length > 0"
+            style="width: 100%; border-collapse: collapse; margin-top: 10px; border: 1px solid #ccc;">
+
+            <thead>
+              <tr style="background: #f2f2f2; text-align: left;">
+                <th style="padding: 10px; border: 1px solid #ccc;">Data e hora</th>
+                <th style="padding: 10px; border: 1px solid #ccc;">Usuário</th>
+                <th style="padding: 10px; border: 1px solid #ccc;">Ação</th>
+                <th style="padding: 10px; border: 1px solid #ccc;">Método</th>
+                <th style="padding: 10px; border: 1px solid #ccc;">Endereço acessado</th>
+                <th style="padding: 10px; border: 1px solid #ccc;">Status HTTP</th>
+                <th style="padding: 10px; border: 1px solid #ccc;">IP</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let log of logsAuditoria">
+                <td style="padding: 10px; border: 1px solid #ccc; white-space: nowrap;">
+                  {{ log.dataHora | date:'dd/MM/yyyy HH:mm:ss' }}
+                </td>
+
+                <td style="padding: 10px; border: 1px solid #ccc;">
+                  {{ log.usuarioLogin || 'Não identificado' }}
+                </td>
+
+                <td style="padding: 10px; border: 1px solid #ccc;">
+                  {{ log.acao || 'Não informada' }}
+                </td>
+
+                <td style="padding: 10px; border: 1px solid #ccc;">
+                  {{ log.metodo || '—' }}
+                </td>
+
+                <td style="padding: 10px; border: 1px solid #ccc; overflow-wrap: anywhere;">
+                  {{ log.uri || '—' }}
+                </td>
+
+                <td style="padding: 10px; border: 1px solid #ccc;">
+                  {{ log.statusHttp ?? '—' }}
+                </td>
+
+                <td style="padding: 10px; border: 1px solid #ccc;">
+                  {{ log.ip || '—' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginação -->
+        <div
+          *ngIf="totalPaginasLogs > 0"
+          style="display: flex; gap: 12px; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+
+          <button
+            type="button"
+            (click)="paginaAnteriorLogs()"
+            [disabled]="paginaLogs === 0 || carregandoLogs">
+            ← Página anterior
+          </button>
+
+          <span>
+            Página {{ paginaLogs + 1 }} de {{ totalPaginasLogs }}
+          </span>
+
+          <button
+            type="button"
+            (click)="proximaPaginaLogs()"
+            [disabled]="paginaLogs + 1 >= totalPaginasLogs || carregandoLogs">
+            Próxima página →
+          </button>
+        </div>
+
+        <p style="margin-top: 16px; color: #666;">
+          Os registros são exibidos do mais recente para o mais antigo,
+          conforme a ordenação definida no Back-End.
+        </p>
+      </section>
+
+      <!-- ABA 6: RELATÓRIOS -->
+      <section class="conteudo-aba" *ngIf="abaAdmin === 'relatorios'">
+
+        <div class="titulo-secao">
+          <p class="etiqueta">CONSULTA E EMISSÃO DE DADOS</p>
+          <h2>Relatórios do Sistema</h2>
+          <p>
+            Gere relatórios da estrutura acadêmica e dos docentes cadastrados,
+            incluindo os vínculos e o status de cada docente.
+          </p>
+        </div>
+
+        <!-- Mensagem do relatório -->
+        <p *ngIf="mensagemRelatorio" role="status">
+          {{ mensagemRelatorio }}
+        </p>
+
+        <!-- Opções de relatório -->
+        <div
+          class="formulario-admin nao-imprimir"
+          style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;">
+
+          <button
+            class="botao-principal"
+            type="button"
+            (click)="gerarRelatorioCompleto()"
+            [disabled]="carregandoRelatorio">
+
+            {{ carregandoRelatorio
+              ? 'Gerando relatório...'
+              : 'Gerar relatório completo' }}
+          </button>
+
+          <button
+            class="botao-principal"
+            type="button"
+            (click)="gerarRelatorioDocentes()"
+            [disabled]="carregandoRelatorio">
+
+            {{ carregandoRelatorio
+              ? 'Gerando relatório...'
+              : 'Relatório de docentes' }}
+          </button>
+
+          <button
+            type="button"
+            (click)="imprimirRelatorio()"
+            [disabled]="!tipoRelatorio || carregandoRelatorio">
+
+            Imprimir / Salvar em PDF
+          </button>
+        </div>
+
+        <!-- Filtro de docentes -->
+        <div
+          *ngIf="tipoRelatorio === 'docentes'"
+          class="formulario-admin nao-imprimir"
+          style="margin-bottom: 24px;">
+
+          <label for="filtroStatusRelatorio">
+            Filtrar docentes por status
+          </label>
+
+          <select
+            id="filtroStatusRelatorio"
+            name="filtroStatusRelatorio"
+            [(ngModel)]="filtroStatusRelatorio">
+
+            <option value="TODOS">Todos os docentes</option>
+            <option value="ATIVO">Somente ativos</option>
+            <option value="INATIVO">Somente inativos</option>
+          </select>
+        </div>
+
+        <!-- Documento do relatório -->
+        <div
+          id="areaRelatorio"
+          *ngIf="tipoRelatorio"
+          style="background: #fff; color: #222; padding: 24px; border: 1px solid #ddd; border-radius: 8px;">
+
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h1>Sistema de Controle de Monitoria de Alunos</h1>
+
+            <h2>
+              {{ tipoRelatorio === 'completo'
+                ? 'Relatório Completo da Estrutura Acadêmica'
+                : 'Relatório de Cadastro de Docentes' }}
+            </h2>
+          </div>
+
+          <!-- Identificação do relatório -->
+          <div style="margin-bottom: 24px; border-bottom: 1px solid #ddd; padding-bottom: 16px;">
+            <p>
+              <strong>Administrador responsável:</strong>
+              {{ nomeAdministradorRelatorio }}
+            </p>
+
+            <p>
+              <strong>Data de emissão:</strong>
+              {{ hojeRelatorio | date:'dd/MM/yyyy HH:mm:ss' }}
+            </p>
+          </div>
+
+          <!-- RELATÓRIO COMPLETO -->
+          <div *ngIf="tipoRelatorio === 'completo'">
+
+            <!-- Instituições -->
+            <h3>1. Instituições de Ensino Superior (IES)</h3>
+
+            <div style="width: 100%; overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+                <thead>
+                  <tr style="background: #f2f2f2; text-align: left;">
+                    <th style="padding: 8px; border: 1px solid #ccc;">Sigla</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Nome</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">E-mail central</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Telefone</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Reitor</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Status</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr *ngFor="let ies of listaIes">
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ ies.sigla }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ ies.nome }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ ies.emailCentral }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ ies.telefoneCentral }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ ies.reitor }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ ies.status || 'ATIVO' }}
+                    </td>
+                  </tr>
+
+                  <tr *ngIf="listaIes.length === 0">
+                    <td colspan="6" style="padding: 8px; border: 1px solid #ccc;">
+                      Nenhuma IES cadastrada.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Centros Acadêmicos -->
+            <h3>2. Centros Acadêmicos</h3>
+
+            <div style="width: 100%; overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+                <thead>
+                  <tr style="background: #f2f2f2; text-align: left;">
+                    <th style="padding: 8px; border: 1px solid #ccc;">Sigla</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Nome</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">IES vinculada</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Coordenador</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Status</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr *ngFor="let ca of centrosRelatorio">
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ ca.sigla }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ ca.nome }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ ca.iesSigla || ca.iesNome || 'Não informado' }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ ca.coordenador }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ ca.status }}
+                    </td>
+                  </tr>
+
+                  <tr *ngIf="centrosRelatorio.length === 0">
+                    <td colspan="5" style="padding: 8px; border: 1px solid #ccc;">
+                      Nenhum Centro Acadêmico encontrado.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Cursos -->
+            <h3>3. Cursos</h3>
+
+            <div style="width: 100%; overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+                <thead>
+                  <tr style="background: #f2f2f2; text-align: left;">
+                    <th style="padding: 8px; border: 1px solid #ccc;">Sigla</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Descrição</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Centro Acadêmico</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">IES</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Coordenador</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Turnos</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Status</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr *ngFor="let curso of cursosRelatorio">
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ curso.sigla }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ curso.descricao }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ curso.centroAcademicoSigla || 'Não informado' }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ curso.iesSigla || 'Não informado' }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ curso.coordenador || 'Não informado' }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ curso.turnos?.join(', ') || 'Não informado' }}
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #ccc;">
+                      {{ curso.status || 'Não informado' }}
+                    </td>
+                  </tr>
+
+                  <tr *ngIf="cursosRelatorio.length === 0">
+                    <td colspan="7" style="padding: 8px; border: 1px solid #ccc;">
+                      Nenhum curso encontrado.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Resumo -->
+            <h3>4. Resumo da estrutura acadêmica</h3>
+
+            <p><strong>Total de IES:</strong> {{ listaIes.length }}</p>
+            <p><strong>Total de Centros Acadêmicos:</strong> {{ centrosRelatorio.length }}</p>
+            <p><strong>Total de cursos:</strong> {{ cursosRelatorio.length }}</p>
+
+          </div>
+
+          <!-- RELATÓRIO DE DOCENTES -->
+          <div *ngIf="tipoRelatorio === 'docentes'">
+
+            <h3>1. Docentes cadastrados</h3>
+
+            <p>
+              <strong>Filtro aplicado:</strong>
+              {{
+                filtroStatusRelatorio === 'TODOS'
+                  ? 'Todos os docentes'
+                  : filtroStatusRelatorio
+              }}
+            </p>
+
+            <p>
+              <strong>Total de docentes no filtro:</strong>
+              {{
+                filtroStatusRelatorio === 'TODOS'
+                  ? docentesRelatorio.length
+                  : contarDocentesPorStatus()
+              }}
+            </p>
+
+            <div style="width: 100%; overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+                <thead>
+                  <tr style="background: #f2f2f2; text-align: left;">
+                    <th style="padding: 8px; border: 1px solid #ccc;">Matrícula</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Nome</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">E-mail</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Telefone</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Centro Acadêmico</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Login</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Data de cadastro</th>
+                    <th style="padding: 8px; border: 1px solid #ccc;">Status</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <ng-container *ngFor="let docente of docentesRelatorio">
+                    <tr
+                      *ngIf="filtroStatusRelatorio === 'TODOS' || docente.status === filtroStatusRelatorio">
+
+                      <td style="padding: 8px; border: 1px solid #ccc;">
+                        {{ docente.matricula }}
+                      </td>
+                      <td style="padding: 8px; border: 1px solid #ccc;">
+                        {{ docente.nome }}
+                      </td>
+                      <td style="padding: 8px; border: 1px solid #ccc;">
+                        {{ docente.email }}
+                      </td>
+                      <td style="padding: 8px; border: 1px solid #ccc;">
+                        {{ docente.telefone }}
+                      </td>
+                      <td style="padding: 8px; border: 1px solid #ccc;">
+                        {{ docente.centroAcademicoSigla || 'Não informado' }}
+                      </td>
+                      <td style="padding: 8px; border: 1px solid #ccc;">
+                        {{ docente.login || 'Não informado' }}
+                      </td>
+                      <td style="padding: 8px; border: 1px solid #ccc;">
+                        {{ docente.dataCadastro ? (docente.dataCadastro | date:'dd/MM/yyyy HH:mm') : 'Não informada' }}
+                      </td>
+                      <td style="padding: 8px; border: 1px solid #ccc;">
+                        {{ docente.status || 'Não informado' }}
+                      </td>
+                    </tr>
+                  </ng-container>
+
+                  <tr *ngIf="docentesRelatorio.length === 0">
+                    <td colspan="8" style="padding: 8px; border: 1px solid #ccc;">
+                      Nenhum docente encontrado.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>2. Resumo dos docentes</h3>
+
+            <p>
+              <strong>Docentes ativos:</strong>
+              {{ contarDocentesPorStatus('ATIVO') }}
+            </p>
+
+            <p>
+              <strong>Docentes inativos:</strong>
+              {{ contarDocentesPorStatus('INATIVO') }}
+            </p>
+
+          </div>
+
+          <hr>
+
+          <p style="font-size: 12px; text-align: center; color: #666;">
+            Relatório gerado pelo Sistema de Controle de Monitoria de Alunos.
+          </p>
+
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+  <footer class="rodape">
+    Sistema acadêmico de controle de monitoria
+  </footer>
+
+</main>

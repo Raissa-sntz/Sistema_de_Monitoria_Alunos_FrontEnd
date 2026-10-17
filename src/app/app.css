@@ -1,0 +1,383 @@
+
+:host {
+  display: block;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #243047;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.pagina-inicial {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f4f6fb;
+}
+
+.cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 7%;
+  background: white;
+  border-bottom: 1px solid #e4e8f0;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.simbolo,
+.icone-grande {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #3559a8;
+  color: white;
+  border-radius: 12px;
+}
+
+.simbolo {
+  width: 42px;
+  height: 42px;
+  font-size: 23px;
+}
+
+.identificacao {
+  color: #667085;
+  font-size: 14px;
+}
+
+.conteudo-principal {
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+  padding: 65px 7%;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+  gap: 55px;
+  flex: 1;
+}
+
+.etiqueta {
+  color: #3559a8;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+h1 {
+  color: #1d2b49;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.2;
+  margin: 18px 0;
+}
+
+.descricao {
+  color: #667085;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.botao-principal {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 14px 22px;
+  border: 0;
+  border-radius: 9px;
+  background: #3559a8;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.botao-principal:hover {
+  background: #274687;
+}
+
+.cartao-ilustrativo,
+.cartao-login {
+  padding: 32px;
+  background: white;
+  border: 1px solid #e4e8f0;
+  border-radius: 18px;
+  box-shadow: 0 12px 35px rgba(30, 50, 90, 0.08);
+}
+
+.icone-grande {
+  width: 60px;
+  height: 60px;
+  font-size: 32px;
+}
+
+.cartao-ilustrativo h2 {
+  color: #1d2b49;
+  margin-top: 22px;
+}
+
+.cartao-ilustrativo p {
+  color: #667085;
+  line-height: 1.6;
+}
+
+.rodape {
+  padding: 20px;
+  text-align: center;
+  color: #667085;
+  font-size: 13px;
+}
+
+.area-login {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 45px 20px;
+}
+
+.cartao-login {
+  width: 100%;
+  max-width: 460px;
+}
+
+.botao-voltar {
+  border: none;
+  padding: 0;
+  margin-bottom: 25px;
+  background: transparent;
+  color: #3559a8;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cartao-login h1 {
+  font-size: 30px;
+}
+
+.cartao-login form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cartao-login label {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.cartao-login input,
+.cartao-login select {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: white;
+  font-size: 15px;
+}
+
+.botao-login {
+  width: 100%;
+}
+
+.mensagem {
+  color: #267047;
+  font-size: 14px;
+}
+
+@media (max-width: 750px) {
+  .cabecalho {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .conteudo-principal {
+    grid-template-columns: 1fr;
+    padding-top: 40px;
+    gap: 30px;
+  }
+
+  .cartao-ilustrativo,
+  .cartao-login {
+    padding: 24px;
+  }
+
+.painel-monitoria {
+  align-items: start;
+}
+
+.painel-monitoria > .texto-apresentacao,
+.painel-monitoria > .cartao-ilustrativo {
+  align-self: start;
+}
+
+.area-disciplinas,
+.lista-monitorias {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+}
+
+.area-disciplinas {
+  padding: 32px;
+  background: #ffffff;
+  border: 1px solid #e4e8f0;
+  border-radius: 18px;
+  box-shadow: 0 12px 35px rgba(30, 50, 90, 0.08);
+}
+
+.titulo-secao h2,
+.lista-disciplinas h2,
+.lista-monitorias h2 {
+  color: #1d2b49;
+  margin-top: 12px;
+}
+
+.formulario-disciplina {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 650px;
+  margin-top: 24px;
+}
+
+.formulario-disciplina label {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #243047;
+}
+
+.formulario-disciplina input,
+.formulario-disciplina select {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #243047;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+}
+
+.formulario-disciplina input:focus,
+.formulario-disciplina select:focus {
+  outline: 2px solid #b9c9ee;
+  border-color: #3559a8;
+}
+
+.acoes-formulario {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.acoes-formulario .botao-principal {
+  margin-top: 0;
+}
+
+.botao-cancelar {
+  padding: 14px 22px;
+  border: 1px solid #d0d5dd;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #344054;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.botao-cancelar:hover {
+  background: #f2f4f7;
+}
+
+.botao-secundario {
+  background: #667085;
+}
+
+.botao-secundario:hover {
+  background: #475467;
+}
+
+.texto-apoio {
+  color: #667085;
+  font-size: 13px;
+}
+
+.mensagem-erro {
+  color: #b42318;
+}
+
+.mensagem-sucesso {
+  color: #267047;
+}
+
+.lista-disciplinas {
+  margin-top: 35px;
+  padding-top: 22px;
+  border-top: 1px solid #e4e8f0;
+}
+
+.cartao-disciplina,
+.cartao-monitoria {
+  margin-top: 15px;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e4e8f0;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(30, 50, 90, 0.04);
+  overflow-wrap: anywhere;
+}
+
+.cartao-disciplina h3,
+.cartao-monitoria h3 {
+  color: #1d2b49;
+  margin-top: 0;
+  line-height: 1.4;
+}
+
+.cartao-disciplina p,
+.cartao-monitoria p {
+  color: #667085;
+  line-height: 1.6;
+}
+
+.painel-monitoria .texto-apresentacao > .botao-principal {
+  margin-right: 8px;
+}
+
+@media (max-width: 750px) {
+  .area-disciplinas {
+    padding: 24px;
+  }
+
+  .acoes-formulario {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .acoes-formulario button {
+    width: 100%;
+  }
+
+  .formulario-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+}
+}
